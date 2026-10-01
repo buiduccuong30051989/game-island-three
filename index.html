@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌴%3C/text%3E%3C/svg%3E" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#fff3e0" />
+  <title>Đảo Bé Học</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff3e0; --ink: #3b3220; --accent: #ff9600; --success: #58cc02; --error: #da5e4e;
+      --blue: #1cb0f6; --card: #fffaf0; --shadow: 0 6px 0 rgba(59, 50, 32, .18);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+    body {
+      font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+      user-select: none; -webkit-user-select: none; touch-action: manipulation; overscroll-behavior: none;
+    }
+    #app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+    /* nút to kiểu sticker: fill phẳng, viền dày, đổ bóng cứng */
+    .big {
+      appearance: none; border: 5px solid var(--ink); border-radius: 999px; background: #fff;
+      width: 88px; height: 88px; font: inherit; font-size: 44px; line-height: 1; cursor: pointer;
+      box-shadow: var(--shadow); display: grid; place-items: center; color: var(--ink);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .big:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(59, 50, 32, .18); }
+    .big.active { background: var(--accent); border-color: #c46e00; }
+
+    #modes, #tools { position: fixed; bottom: max(18px, env(safe-area-inset-bottom)); display: flex; gap: 16px; z-index: 5; }
+    #modes { left: max(18px, env(safe-area-inset-left)); }
+    #tools { right: max(18px, env(safe-area-inset-right)); }
+    #quiz { background: var(--blue); border-color: #0f7fb5; color: #fff; }
+
+    #word {
+      position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 5;
+      background: var(--card); border: 5px solid var(--ink); border-radius: 28px; padding: 6px 34px 10px;
+      font-size: clamp(52px, 8vw, 92px); font-weight: 800; letter-spacing: .04em; box-shadow: var(--shadow);
+      display: flex; gap: .02em;
+    }
+    #word span { transition: color .15s, transform .15s; display: inline-block; }
+    #word span.lit { color: var(--accent); transform: translateY(-6px) scale(1.08); }
+    #word.whole span { color: var(--success); animation: bounce .5s ease; }
+    @keyframes bounce { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-3deg); } 100% { transform: scale(1); } }
+
+    #counter {
+      position: fixed; top: 22px; right: max(22px, env(safe-area-inset-right)); z-index: 5;
+      width: 104px; height: 104px; border-radius: 50%; background: var(--accent); border: 5px solid var(--ink);
+      color: #fff; font-size: 66px; font-weight: 800; display: grid; place-items: center; box-shadow: var(--shadow);
+    }
+    #counter.bump { animation: bump .35s ease; }
+    @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+    #numbers {
+      position: fixed; bottom: 128px; left: 50%; transform: translateX(-50%); display: flex; gap: 22px; z-index: 6;
+    }
+    .num {
+      appearance: none; border: 6px solid var(--ink); border-radius: 28px; background: #fff; color: var(--ink);
+      width: 116px; height: 116px; font: inherit; font-size: 72px; font-weight: 800; box-shadow: var(--shadow); cursor: pointer;
+    }
+    .num:active { transform: translateY(4px); }
+    .num.correct { background: var(--success); color: #fff; border-color: #3f9500; }
+    .wobble { animation: wobble .45s ease; }
+    @keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } 75% { transform: rotate(-4deg); } }
+
+    #start {
+      position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(255, 243, 224, .92);
+      transition: opacity .45s ease;
+    }
+    #start.hide { opacity: 0; pointer-events: none; }
+    #start-btn {
+      width: 170px; height: 170px; font-size: 92px; background: var(--accent); border-color: #c46e00; opacity: .55;
+    }
+    #start-btn.ready { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+    #start p { position: absolute; bottom: 12%; font-size: 22px; opacity: .6; }
+
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 20; overflow: hidden; }
+    #confetti i { position: absolute; top: -20px; width: 14px; height: 22px; border-radius: 4px; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: .6; } }
+
+    @media (max-width: 720px) {
+      .big { width: 84px; height: 84px; font-size: 42px; }
+      .num { width: 108px; height: 108px; font-size: 66px; }
+      #counter { width: 104px; height: 104px; font-size: 64px; }
+      #numbers { bottom: 120px; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="word" hidden></div>
+  <div id="counter" hidden></div>
+  <div id="numbers" hidden></div>
+
+  <div id="modes">
+    <button id="mode-spell" class="big active" aria-label="Học đánh vần">🐄</button>
+    <button id="mode-count" class="big" aria-label="Học đếm">🍎</button>
+  </div>
+  <div id="tools">
+    <button id="repeat" class="big" aria-label="Nghe lại">🔊</button>
+    <button id="quiz" class="big" aria-label="Đố">❓</button>
+  </div>
+
+  <div id="confetti"></div>
+
+  <div id="start">
+    <button id="start-btn" class="big" aria-label="Bắt đầu">⏳</button>
+    <p>Chạm để bắt đầu</p>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

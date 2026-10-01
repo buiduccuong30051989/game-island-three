@@ -1,0 +1,54 @@
+# key|text  (giọng Linh macOS; thay file cùng tên bằng giọng bố mẹ nếu muốn)
+# --- lời dẫn
+hello|Chào con! Chạm vào con vật để nghe tên nhé.
+ask_bo|Con nào là con bò?
+ask_heo|Con nào là con heo?
+ask_ga|Con nào là con gà?
+ask_cho|Con nào là con chó?
+ask_count|Đếm xem có mấy quả táo?
+ask_pick_number|Có mấy quả táo? Chạm vào số đúng nhé.
+good|Giỏi lắm!
+right|Đúng rồi!
+yay|Tuyệt vời!
+retry|Thử lại nhé!
+almost|Gần đúng rồi, thử lại nào!
+mode_spell|Học đánh vần
+mode_count|Học đếm
+# --- tên con vật
+name_bo|con bò
+name_heo|con heo
+name_ga|con gà
+name_cho|con chó
+# --- token đánh vần (bờ-o-bo-huyền-bò)
+t_bo_1|bờ
+t_bo_2|o
+t_bo_3|bo
+t_bo_4|huyền
+t_bo_5|bò
+t_heo_1|e
+t_heo_2|o
+t_heo_3|eo
+t_heo_4|hờ
+t_heo_5|eo
+t_heo_6|heo
+t_ga_1|gờ
+t_ga_2|a
+t_ga_3|ga
+t_ga_4|huyền
+t_ga_5|gà
+t_cho_1|chờ
+t_cho_2|o
+t_cho_3|cho
+t_cho_4|sắc
+t_cho_5|chó
+# --- số
+n1|một
+n2|hai
+n3|ba
+n4|bốn
+n5|năm
+n6|sáu
+n7|bảy
+n8|tám
+n9|chín
+n10|mười
