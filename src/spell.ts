@@ -17,6 +17,16 @@ const EXPLORE_CHEER_EVERY = 4;
 
 export const PRAISE_RIGHT = ['right', 'right_2', 'right_3'];
 export const PRAISE_DONE = ['good', 'yay', 'yay_2'];
+/** Tiếng kêu thật của từng con (Wikimedia Commons, xem CREDITS trong README). */
+const CRY: Record<string, string[]> = {
+  bo: ['cry_cow'], heo: ['cry_pig', 'cry_pig'], ga: ['cry_hen'], cho: ['cry_dog'], mun: ['cry_cat'], rom: ['cry_cat'],
+};
+export const CRY_KEYS = [...new Set(Object.values(CRY).flat())];
+/** Phát tiếng kêu (heo kêu 2 tiếng "ụt ịt"). */
+export async function cry(id: string): Promise<void> {
+  for (const k of CRY[id] ?? []) await play(k);
+}
+
 export const pickOne = (keys: string[]) => keys[Math.floor(Math.random() * keys.length)];
 
 export class SpellMode {
@@ -90,6 +100,7 @@ export class SpellMode {
     if (!this.quizTarget) {
       // khám phá: nhảy + tên + đánh vần
       void this.scene.jump(t);
+      await cry(def.id);
       const ok = await this.spell(def);
       if (ok && ++this.explored % EXPLORE_CHEER_EVERY === 0 && this.active) {
         await wait(250);
@@ -101,6 +112,7 @@ export class SpellMode {
     if (def.id !== this.quizTarget.id) {
       sfx('sfx_soft', 0.5);
       void this.scene.wobble(t);
+      await cry(def.id);
       await play(Math.random() < 0.5 ? 'retry' : 'almost');
       await wait(300);
       if (this.quizTarget) await play(`ask_${this.quizTarget.id}`);
@@ -113,6 +125,7 @@ export class SpellMode {
       sfx('sfx_win', 0.5);
       this.sparkleAt(t);
       void this.scene.jump(t);
+      await cry(def.id);
       await play(pickOne(PRAISE_RIGHT));
       await this.spell(def);
       this.solved++;

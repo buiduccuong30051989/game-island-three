@@ -81,3 +81,15 @@ Token đánh vần theo GDPT 2018: âm đầu – vần – ghép – thanh – 
 - Giọng máy đọc token lẻ ("bờ", "huyền") cần bố mẹ nghe duyệt; thay file cùng tên trong `public/audio/` nếu muốn dùng giọng thật.
 - Chưa có màn hình dọc tối ưu (đã co frustum nhưng chưa chỉnh UI).
 - Chưa lưu tiến độ, chưa có chế độ so sánh nhiều/ít, tách gộp (mục 4b report).
+
+## Nhấc con vật & tiếng kêu
+
+- Giữ ngón tay lên 1 con vật rồi kéo: con vật bị nhấc bổng lên (chân đung đưa, kêu 1 tiếng), thả ra thì rơi xuống nảy nhẹ + lấp lánh. Chạm nhanh vẫn là đánh vần. Chỉ ở chế độ 🐄.
+- Chạm con vật: nó kêu tiếng thật trước rồi mới đọc tên + đánh vần (cả khi đố, chạm nhầm con nào thì con đó kêu).
+- File `public/audio/cry_*.m4a` lấy từ Wikimedia Commons, đã cắt ngắn + chuẩn hoá âm lượng:
+  - chó: "Barking of a dog.ogg" (CC BY-SA 3.0)
+  - mèo: "Maullido de gata hembra joven.ogg" (CC0)
+  - bò: "Cow in Vezo.ogg" (CC0)
+  - heo: "Mudchute pig 1.ogg" (CC BY-SA 3.0)
+  - gà: "Hen announcing shes lain an egg.ogg" (Public domain)
+  Muốn thay tiếng khác: ghi đè file cùng tên.

@@ -6,7 +6,7 @@ import { ANIMALS } from './data';
 import { IslandScene, type Tappable } from './scene';
 import { unlockAudio, preload, play, stopSpeech, isSpeaking, sfx } from './audio';
 import { els, setMode } from './ui';
-import { SpellMode } from './spell';
+import { SpellMode, CRY_KEYS, cry } from './spell';
 import { CountMode } from './count';
 import { Life } from './life';
 import { Ambient } from './ambient';
@@ -19,6 +19,7 @@ const AUDIO_KEYS = [...new Set([
   ...['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10'],
   ...ANIMALS.flatMap((a) => [`name_${a.id}`, `ask_${a.id}`, ...a.tokens.map((t) => t.audio)]),
   ...FAMILY_KEYS,
+  ...CRY_KEYS,
 ])];
 
 /** Thời gian ngồi im trước lần nhắc đầu; sau đó giãn dần (đừng nhắc dồn). */
@@ -142,8 +143,47 @@ async function boot(): Promise<void> {
     }
   }
 
+  // ---------- nhấc & thả con vật ----------
+  // Giữ ngón tay lên con vật rồi kéo (> 12 px) = nhấc lên; chạm nhanh vẫn là đánh vần như cũ.
+  const canvas = scene.renderer.domElement;
+  let press: { t: Tappable; x: number; y: number; id: number } | null = null;
+  let dragged: Tappable | null = null;
+  let swallowClick = false;
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!started || switching || mode !== 'spell') return;
+    const t = scene.pick(e.clientX, e.clientY);
+    if (t && t.kind === 'animal') press = { t, x: e.clientX, y: e.clientY, id: e.pointerId };
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!press || e.pointerId !== press.id) return;
+    if (!dragged) {
+      if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 12) return;
+      if (!life.grab(press.t)) { press = null; return; }
+      dragged = press.t;
+      canvas.setPointerCapture(e.pointerId);
+      sfx('sfx_pop', 0.5);
+      void cry(dragged.id); // nhấc lên là nó kêu
+    }
+    const g = scene.groundAt(e.clientX, e.clientY);
+    if (g) life.dragTo(dragged, g.x, g.z);
+  });
+  const endDrag = (e: PointerEvent) => {
+    if (press && e.pointerId === press.id && dragged) {
+      const at = life.drop(dragged);
+      if (at) setTimeout(() => { sfx('sfx_soft', 0.5); ambient.sparkles.burst(at.setY(0.2), 30); }, 320);
+      swallowClick = true; // click ngay sau khi thả không tính là chạm
+      setTimeout(() => (swallowClick = false), 50);
+    }
+    press = null;
+    dragged = null;
+  };
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.style.touchAction = 'none';
+
   scene.renderer.domElement.addEventListener('click', (e) => {
     if (!started) return;
+    if (swallowClick) return;
     poke();
     if (switching) return;
     const t = scene.pick(e.clientX, e.clientY);

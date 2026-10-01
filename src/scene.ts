@@ -611,6 +611,15 @@ export class IslandScene {
     this.frameFns.push(fn);
   }
 
+  /** Điểm trên mặt đất (y = 0) dưới vị trí màn hình. */
+  groundAt(clientX: number, clientY: number): THREE.Vector3 | null {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const out = new THREE.Vector3();
+    return this.raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), out);
+  }
+
   /** Toạ độ màn hình (px) của 1 điểm thế giới. */
   toScreen(p: THREE.Vector3): { x: number; y: number } {
     const v = p.clone().project(this.camera);

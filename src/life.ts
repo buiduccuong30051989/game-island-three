@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import type { AnimalDef } from './data';
 import type { IslandScene, Tappable } from './scene';
 
-type State = 'idle' | 'walk' | 'act' | 'held';
+type State = 'idle' | 'walk' | 'act' | 'held' | 'drag' | 'drop';
 
 /** Vùng cỏ con vật được đi: ellipse giữa đảo (nửa trước, không lẫn sau nhà/cây). */
 const AREA = { cx: 0.1, cz: 0.55, a: 3.9, b: 2.75 };
@@ -27,6 +27,11 @@ class Wanderer {
   yaw: number;
   target = new THREE.Vector2();
   holds = 0;
+  /** nhấc lên (đang kéo / đang rơi): độ cao + vận tốc rơi */
+  lift = 0;
+  vy = 0;
+  swing = 0;
+  dragTarget = new THREE.Vector2();
   /** bán kính chiếm chỗ (bò to hơn gà) */
   readonly radius: number;
   private walkPhase = Math.random() * 10;
@@ -133,6 +138,56 @@ export class Life {
     }
   }
 
+  /** Bé giữ và kéo: nhấc con vật lên. */
+  grab(t: Tappable): boolean {
+    const w = this.ws.get(t.id);
+    if (!w || t.busy || w.state === 'drag' || w.state === 'drop') return false;
+    w.setWalkAnim(false);
+    w.fadeTo(undefined, 0.15);
+    w.state = 'drag';
+    w.dragTarget.copy(w.pos);
+    return true;
+  }
+
+  /** Kéo tới điểm (x, z) trên mặt đất — bị kẹp vào vùng cỏ, né vật cản. */
+  dragTo(t: Tappable, x: number, z: number): void {
+    const w = this.ws.get(t.id);
+    if (!w || w.state !== 'drag') return;
+    w.dragTarget.copy(this.clampFree(x, z));
+  }
+
+  /** Thả: rơi xuống, nảy nhẹ, rồi đứng nhìn bé. Trả về vị trí chạm đất. */
+  drop(t: Tappable): THREE.Vector3 | null {
+    const w = this.ws.get(t.id);
+    if (!w || w.state !== 'drag') return null;
+    w.state = 'drop';
+    w.vy = 0;
+    return new THREE.Vector3(w.dragTarget.x, 0, w.dragTarget.y);
+  }
+
+  /** Đang kéo con nào không. */
+  get dragging(): boolean {
+    for (const w of this.ws.values()) if (w.state === 'drag' || w.state === 'drop') return true;
+    return false;
+  }
+
+  /** Điểm gần nhất đứng được: kẹp vào ellipse cỏ rồi đẩy ra khỏi vật cản. */
+  private clampFree(x: number, z: number): THREE.Vector2 {
+    let ex = (x - AREA.cx) / AREA.a, ez = (z - AREA.cz) / AREA.b;
+    const k = Math.hypot(ex, ez);
+    if (k > 0.97) { ex *= 0.97 / k; ez *= 0.97 / k; }
+    let px = AREA.cx + ex * AREA.a, pz = AREA.cz + ez * AREA.b;
+    for (const o of this.scene.obstacles) {
+      const dx = px - o.x, dz = pz - o.z, d = Math.hypot(dx, dz), min = o.r + BODY_R;
+      if (d < min) {
+        const n = d > 1e-4 ? 1 / d : 0;
+        px = o.x + (n ? dx * n : 1) * min;
+        pz = o.z + (n ? dz * n : 0) * min;
+      }
+    }
+    return new THREE.Vector2(px, pz);
+  }
+
   /** 1 con vật đang hiện, chọn ngẫu nhiên (cho mũi tên gợi ý). */
   randomVisible(): Tappable | null {
     const list = [...this.ws.values()].filter((w) => w.t.root.visible);
@@ -149,6 +204,38 @@ export class Life {
     for (const w of this.ws.values()) {
       const root = w.t.root;
       if (!root.visible) continue;
+      if (w.state === 'drag') {
+        // bay lơ lửng theo ngón tay, chân đung đưa, mặt quay ra bé
+        const p = w.pos;
+        const f = Math.min(1, dt * 14);
+        root.position.x = p.x + (w.dragTarget.x - p.x) * f;
+        root.position.z = p.y + (w.dragTarget.y - p.y) * f;
+        w.lift += (0.9 - w.lift) * Math.min(1, dt * 10);
+        w.swing += dt * 9;
+        root.position.y = w.lift + Math.sin(w.swing * 0.5) * 0.05;
+        root.rotation.z = Math.sin(w.swing) * 0.18;
+        const d = wrapAngle(FACE_CAMERA - w.yaw);
+        w.yaw += Math.sign(d) * Math.min(Math.abs(d), HELD_TURN_RATE * dt);
+        root.rotation.y = w.yaw;
+        continue;
+      }
+      if (w.state === 'drop') {
+        root.position.x = w.dragTarget.x;
+        root.position.z = w.dragTarget.y;
+        root.rotation.z *= Math.max(0, 1 - dt * 12);
+        w.vy -= 22 * dt;
+        w.lift += w.vy * dt;
+        if (w.lift <= 0) {
+          if (Math.abs(w.vy) > 2.5) { w.lift = 0.001; w.vy = -w.vy * 0.35; } // nảy 1 cái
+          else {
+            w.lift = 0; w.vy = 0; root.rotation.z = 0;
+            w.state = 'idle';
+            w.timer = 2 + Math.random() * 2; // đứng ngơ ngác nhìn bé một chút
+          }
+        }
+        root.position.y = w.lift;
+        continue;
+      }
       if (w.state === 'held') {
         // quay mặt ra bé
         const d = wrapAngle(FACE_CAMERA - w.yaw);
