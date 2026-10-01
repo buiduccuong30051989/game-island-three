@@ -82,7 +82,36 @@
     }
     #start-btn.ready { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-    #start p { position: absolute; bottom: 12%; font-size: 22px; opacity: .6; }
+    #start h1 { position: absolute; top: 16%; margin: 0; font-size: clamp(56px, 10vw, 110px); font-weight: 800; color: var(--accent);
+      -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(59, 50, 32, .18); animation: hello 2.2s ease-in-out infinite; }
+    @keyframes hello { 0%,100% { transform: rotate(-2deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-8px); } }
+    #start p { position: absolute; bottom: 12%; font-size: 24px; opacity: .65; margin: 0; }
+
+    /* mũi tay gợi ý khi bé ngồi im (main.ts đặt vị trí theo con vật) */
+    #pointer { position: fixed; left: 0; top: 0; z-index: 7; pointer-events: none; font-size: 60px; line-height: 1; will-change: transform; }
+    #pointer span { display: block; animation: poke .7s ease-in-out infinite alternate; filter: drop-shadow(0 4px 0 rgba(59, 50, 32, .2)); }
+    @keyframes poke { from { transform: translateY(-14px); } to { transform: translateY(4px); } }
+
+    /* gia đình khen: bong bóng trượt vào từ mép phải (src/family.ts) */
+    #family { position: fixed; right: max(16px, env(safe-area-inset-right)); top: calc(max(16px, env(safe-area-inset-top)) + 140px); z-index: 12; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; }
+    .fam-card { --fam: #ff5fb4; display: flex; align-items: center; gap: 14px; background: #fffaf0; border: 5px solid var(--fam); border-radius: 999px 40px 40px 999px; padding: 8px 26px 8px 8px;
+      box-shadow: var(--shadow), 0 0 0 6px rgba(255,255,255,.55); max-width: min(520px, 82vw); animation: famIn .5s cubic-bezier(.2,1.5,.4,1) both; position: relative; }
+    .fam-card::after { content: '💖'; position: absolute; left: -8px; top: -12px; font-size: 32px; animation: famHeart 1.2s ease-in-out infinite; }
+    .fam-card.out { animation: famOut .45s ease-in both; }
+    .fam-ava { width: 104px; height: 104px; flex: none; border-radius: 50%; border: 5px solid var(--fam); background: radial-gradient(circle at 50% 35%, #fff, #ffeedd); display: grid; place-items: center; font-size: 66px; line-height: 1; overflow: hidden; animation: famBob .9s ease-in-out infinite alternate; }
+    .fam-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .fam-body { display: flex; flex-direction: column; min-width: 0; }
+    .fam-name { font-size: 32px; font-weight: 800; color: var(--fam); line-height: 1.05; }
+    .fam-say { font-size: 28px; font-weight: 800; line-height: 1.15; color: var(--ink); }
+    .fam-card.mini { padding: 5px 18px 5px 5px; gap: 10px; }
+    .fam-card.mini::after { display: none; }
+    .fam-card.mini .fam-ava { width: 64px; height: 64px; font-size: 40px; border-width: 4px; }
+    .fam-card.mini .fam-name { font-size: 22px; }
+    .fam-card.mini .fam-say { font-size: 20px; }
+    @keyframes famIn { from { transform: translateX(120%) rotate(6deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
+    @keyframes famOut { to { transform: translateX(120%); opacity: 0; } }
+    @keyframes famBob { from { transform: translateY(-3px) rotate(-4deg); } to { transform: translateY(3px) rotate(4deg); } }
+    @keyframes famHeart { 0%,100% { transform: scale(.85); } 50% { transform: scale(1.15); } }
 
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 20; overflow: hidden; }
     #confetti i { position: absolute; top: -20px; width: 14px; height: 22px; border-radius: 4px; animation: fall linear forwards; }
@@ -93,6 +122,12 @@
       .num { width: 108px; height: 108px; font-size: 66px; }
       #counter { width: 104px; height: 104px; font-size: 64px; }
       #numbers { bottom: 120px; gap: 14px; }
+    }
+    @media (max-width: 720px), (max-height: 620px) {
+      #family { top: calc(max(14px, env(safe-area-inset-top)) + 128px); }
+      .fam-ava { width: 76px; height: 76px; font-size: 48px; }
+      .fam-name { font-size: 24px; } .fam-say { font-size: 21px; }
+      .fam-card.mini .fam-ava { width: 52px; height: 52px; font-size: 32px; }
     }
   </style>
 </head>
@@ -112,11 +147,13 @@
     <button id="quiz" class="big" aria-label="Đố">❓</button>
   </div>
 
+  <div id="pointer" hidden><span>👇</span></div>
   <div id="confetti"></div>
 
   <div id="start">
+    <h1>Chào Nhím!</h1>
     <button id="start-btn" class="big" aria-label="Bắt đầu">⏳</button>
-    <p>Chạm để bắt đầu</p>
+    <p>Chạm để vào đảo nhé</p>
   </div>
 
   <script type="module" src="/src/main.ts"></script>

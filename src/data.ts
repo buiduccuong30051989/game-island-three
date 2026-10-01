@@ -27,13 +27,20 @@ export interface SpellToken {
 }
 
 export interface AnimalDef {
-  id: string;           // khoá audio: name_<id>, ask_<id>, t_<id>_n
+  id: string;           // khoá audio: name_<id>, ask_<id>; token đánh vần ghi rõ trong tokens
   model: string;        // file trong public/models
   word: string;         // chữ hiển thị
   height: number;       // chiều cao sau normalize (nhà cao ~2.2)
   tokens: SpellToken[];
   pos: [number, number, number];
   rotY: number;
+  /** đi lang thang: clip đi (không có thì lạch bạch bằng code), tốc độ (đv/s) */
+  walk?: string;
+  speed: number;
+  /** clip "làm trò" thỉnh thoảng chơi khi đứng (ăn cỏ, nhảy, múa...) */
+  acts: string[];
+  /** đổi màu material theo tên (vd. mèo Mun đen, mèo Rơm vàng cam) */
+  tint?: Record<string, number>;
 }
 
 /*
@@ -43,6 +50,17 @@ export interface AnimalDef {
  *  - tiếng có thanh: ... – tiếng không dấu – tên dấu – tiếng
  * Gọi phụ âm theo ÂM (bờ, cờ, hờ, gờ, chờ), không theo tên chữ (bê, xê).
  */
+const MEO_TOKENS: SpellToken[] = [
+  { audio: 't_meo_1', lit: [1] },        // e
+  { audio: 't_meo_2', lit: [2] },        // o
+  { audio: 't_meo_3', lit: [1, 2] },     // eo
+  { audio: 't_meo_4', lit: [0] },        // mờ
+  { audio: 't_meo_5', lit: [1, 2] },     // eo
+  { audio: 't_meo_6', lit: [0, 1, 2] },  // meo
+  { audio: 't_meo_7', lit: [1] },        // huyền
+  { audio: 't_meo_8', lit: [0, 1, 2] },  // mèo
+];
+
 export const ANIMALS: AnimalDef[] = [
   {
     id: 'bo', model: 'cow.glb', word: 'bò', height: 1.15,
@@ -54,6 +72,7 @@ export const ANIMALS: AnimalDef[] = [
       { audio: 't_bo_5', lit: [0, 1] },   // bò
     ],
     pos: [-2.2, 0, 1.0], rotY: Math.PI * 0.55,
+    walk: 'WalkSlow', speed: 0.42, acts: ['Jump'],
   },
   {
     id: 'heo', model: 'pig.glb', word: 'heo', height: 0.85,
@@ -66,6 +85,7 @@ export const ANIMALS: AnimalDef[] = [
       { audio: 't_heo_6', lit: [0, 1, 2] },  // heo
     ],
     pos: [0.4, 0, 2.2], rotY: Math.PI * 0.5,
+    speed: 0.38, acts: ['Jump'],
   },
   {
     id: 'ga', model: 'chicken.glb', word: 'gà', height: 0.7,
@@ -77,6 +97,7 @@ export const ANIMALS: AnimalDef[] = [
       { audio: 't_ga_5', lit: [0, 1] },   // gà
     ],
     pos: [2.6, 0, 0.9], rotY: Math.PI * 0.45,
+    walk: 'Walk', speed: 0.5, acts: ['Bite_Front', 'Yes', 'Dance'],
   },
   {
     id: 'cho', model: 'dog.glb', word: 'chó', height: 0.8,
@@ -88,6 +109,23 @@ export const ANIMALS: AnimalDef[] = [
       { audio: 't_cho_5', lit: [0, 1, 2] },  // chó
     ],
     pos: [0.2, 0, -0.4], rotY: Math.PI * 0.4,
+    walk: 'AnimalArmature|Walk', speed: 0.6, acts: ['AnimalArmature|Eating', 'AnimalArmature|Idle_2_HeadLow', 'AnimalArmature|Jump_ToIdle'],
+  },
+  // Hai bé mèo nhà Nhím. Cùng từ "mèo" nên dùng chung token t_meo_*; tên riêng ở name_mun / name_rom.
+  // Vần 2 chữ (eo) + thanh huyền: e – o – eo – mờ – eo – meo – huyền – mèo
+  {
+    id: 'mun', model: 'cat.glb', word: 'mèo', height: 0.72,
+    tokens: MEO_TOKENS,
+    pos: [-1.0, 0, 2.5], rotY: Math.PI * 0.3,
+    walk: 'Walk', speed: 0.55, acts: ['Yes', 'Dance', 'Bite_Front'],
+    tint: { Cat_Main: 0x3a3a44, Cat_Secondary: 0x26262d },
+  },
+  {
+    id: 'rom', model: 'cat.glb', word: 'mèo', height: 0.72,
+    tokens: MEO_TOKENS,
+    pos: [2.1, 0, 2.2], rotY: Math.PI * 0.6,
+    walk: 'Walk', speed: 0.55, acts: ['Yes', 'Dance', 'Bite_Front'],
+    tint: { Cat_Main: 0xf3a64e, Cat_Secondary: 0xd8742a },
   },
 ];
 

@@ -1,8 +1,13 @@
-// Chế độ đếm: táo hiện trên bãi cỏ, chạm từng quả (một, hai, ba...), rồi chạm số đúng.
+// Chế độ đếm: táo rơi từ cây táo xuống bãi cỏ (nảy nảy), chạm từng quả (một, hai, ba...), rồi chạm số đúng.
+// Xong mỗi vòng: 1 người nhà khen Nhím.
+import * as THREE from 'three';
 import { APPLE_HEIGHT, APPLE_SLOTS, NUMBER_AUDIO } from './data';
 import type { IslandScene, Tappable } from './scene';
+import type { Ambient } from './ambient';
 import { play, sfx } from './audio';
 import { setCounter, showNumbers, hideNumbers, wobbleEl, confetti } from './ui';
+import { familyCheer, clearFamily } from './family';
+import { PRAISE_DONE, pickOne } from './spell';
 import { wait } from './tween';
 
 export class CountMode {
@@ -14,7 +19,15 @@ export class CountMode {
   private active = false;
   private session = 0; // tăng mỗi lần enter/exit để bỏ qua continuation cũ
 
-  constructor(private scene: IslandScene) {}
+  constructor(private scene: IslandScene, private ambient: Ambient) {}
+
+  get phaseNow(): 'idle' | 'count' | 'pick' { return this.phase; }
+
+  /** 1 quả táo chưa đếm (cho mũi tên gợi ý). */
+  uncounted(): Tappable | null {
+    const left = this.apples.filter((a) => !this.counted.has(a.id) && a.hit.visible);
+    return left.length ? left[Math.floor(Math.random() * left.length)] : null;
+  }
 
   async enter(): Promise<void> {
     this.session++;
@@ -29,6 +42,7 @@ export class CountMode {
     this.phase = 'idle';
     hideNumbers();
     setCounter(null);
+    clearFamily();
     for (const a of this.apples) this.scene.removeTappable(a);
     this.apples = [];
   }
@@ -59,13 +73,12 @@ export class CountMode {
       t.hit.visible = false;
       return t;
     });
+    const s = this.session;
     this.apples = await Promise.all(jobs);
-    if (!this.active) return;
-    for (const a of this.apples) {
-      void this.scene.setVisible(a, true);
-      sfx('sfx_pop', 0.35);
-      await wait(90);
-    }
+    if (!this.active || s !== this.session) return;
+    // táo rơi lần lượt từ cây (cây rung), chạm đất kêu "bụp"
+    await Promise.all(this.apples.map((a, i) => this.scene.dropFromTree(a, i * 260, () => sfx('sfx_pop', 0.3))));
+    if (!this.active || s !== this.session) return;
     this.phase = 'count';
     await play('ask_count');
   }
@@ -116,14 +129,21 @@ export class CountMode {
     }
     this.phase = 'idle';
     btn.classList.add('correct');
+    const s = this.session;
     sfx('sfx_win', 0.5);
     confetti(50);
     setCounter(this.target);
-    await play(Math.random() < 0.5 ? 'good' : 'yay');
+    for (const a of this.apples) this.ambient.sparkles.burst(a.root.position.clone().add(new THREE.Vector3(0, 0.3, 0)), 8);
+    await play(pickOne(PRAISE_DONE));
+    if (s !== this.session) return;
     hideNumbers();
     await Promise.all(this.apples.map((a, i) => wait(i * 60).then(() => this.scene.flyAway(a))));
     this.apples = [];
-    await wait(400);
+    if (s !== this.session) return;
+    // người nhà khen sau mỗi vòng đếm
+    await familyCheer(() => this.active && s === this.session);
+    await wait(300);
+    if (s !== this.session) return;
     await this.nextRound();
   }
 }

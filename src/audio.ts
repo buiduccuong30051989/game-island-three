@@ -98,6 +98,11 @@ export async function speakSequence(
   return my === seqToken;
 }
 
+/** Đang có giọng đọc (không tính sfx). */
+export function isSpeaking(): boolean {
+  return current !== null;
+}
+
 export function stopSpeech(): void {
   seqToken++;
   if (current) {

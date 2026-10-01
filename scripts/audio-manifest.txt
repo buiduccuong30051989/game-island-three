@@ -1,24 +1,34 @@
 # key|text  (giọng Linh macOS; thay file cùng tên bằng giọng bố mẹ nếu muốn)
 # --- lời dẫn
-hello|Chào con! Chạm vào con vật để nghe tên nhé.
+hello|Chào Nhím! Nhím chạm vào con vật để nghe tên nhé.
 ask_bo|Con nào là con bò?
 ask_heo|Con nào là con heo?
 ask_ga|Con nào là con gà?
 ask_cho|Con nào là con chó?
+ask_mun|Con nào là mèo Mun?
+ask_rom|Con nào là mèo Rơm?
 ask_count|Đếm xem có mấy quả táo?
 ask_pick_number|Có mấy quả táo? Chạm vào số đúng nhé.
-good|Giỏi lắm!
+good|Nhím giỏi lắm!
 right|Đúng rồi!
-yay|Tuyệt vời!
+right_2|Đúng rồi, Nhím ơi!
+right_3|Hà An giỏi quá, đúng rồi!
+yay|Tuyệt vời, Hà An ơi!
+yay_2|Hoan hô Nhím!
 retry|Thử lại nhé!
 almost|Gần đúng rồi, thử lại nào!
 mode_spell|Học đánh vần
 mode_count|Học đếm
+# --- nhắc khi bé ngồi im ~10 giây
+hint_tap|Nhím chạm vào con vật nào đó đi!
+hint_count|Nhím chạm vào từng quả táo để đếm nhé!
 # --- tên con vật
 name_bo|con bò
 name_heo|con heo
 name_ga|con gà
 name_cho|con chó
+name_mun|Mèo Mun đây!
+name_rom|Mèo Rơm đây!
 # --- token đánh vần (bờ-o-bo-huyền-bò)
 t_bo_1|bờ
 t_bo_2|o
@@ -41,6 +51,15 @@ t_cho_2|o
 t_cho_3|cho
 t_cho_4|sắc
 t_cho_5|chó
+# mèo (vần 2 chữ eo + thanh huyền): e – o – eo – mờ – eo – meo – huyền – mèo
+t_meo_1|e
+t_meo_2|o
+t_meo_3|eo
+t_meo_4|mờ
+t_meo_5|eo
+t_meo_6|meo
+t_meo_7|huyền
+t_meo_8|mèo
 # --- số
 n1|một
 n2|hai
@@ -52,3 +71,26 @@ n7|bảy
 n8|tám
 n9|chín
 n10|mười
+# --- gia đình Nhím khen (chữ hiện trên bong bóng ở src/family.ts)
+fam_ba_cuong_1|Ba Cường khen: Nhím của ba giỏi quá!
+fam_ba_cuong_2|Ba Cường giơ ngón tay cái cho Hà An nè!
+fam_ba_cuong_3|Ba Cường khen: Nhím đọc hay quá!
+fam_me_yen_1|Mẹ Yến thơm Nhím một cái!
+fam_me_yen_2|Mẹ Yến khen: Hà An của mẹ ngoan quá!
+fam_me_yen_3|Mẹ Yến thương Nhím nhất trên đời!
+fam_ba_tuyet_1|Bà Tuyết ôm Nhím một cái thật chặt!
+fam_ba_tuyet_2|Bà Tuyết khen: cháu bà giỏi quá!
+fam_ba_tuyet_3|Bà Tuyết thương Hà An nhiều lắm!
+fam_ong_cuong_1|Ông Cương khen Nhím giỏi quá!
+fam_ong_cuong_2|Ông Cương vỗ tay cho Hà An nè!
+fam_ong_cuong_3|Ông Cương cười tít mắt vì Nhím đó!
+fam_bac_hanh_1|Bác Hanh thơm Nhím một cái!
+fam_bac_hanh_2|Bác Hanh khen Hà An thông minh quá!
+fam_bac_hanh_3|Bác Hanh bảo: Nhím ơi, hoan hô!
+fam_ba_cuong_all|Ba Cường: Hoan hô Nhím!
+fam_me_yen_all|Mẹ Yến: Nhím giỏi nhất!
+fam_ba_tuyet_all|Bà Tuyết: Bà thương Nhím!
+fam_ong_cuong_all|Ông Cương: Tuyệt vời cháu ơi!
+fam_bac_hanh_all|Bác Hanh: Thơm Nhím nào!
+fam_all|Cả nhà thương Nhím nhiều lắm!
+fam_house|Đây là nhà của Nhím! Cả nhà ai cũng thương Nhím.
